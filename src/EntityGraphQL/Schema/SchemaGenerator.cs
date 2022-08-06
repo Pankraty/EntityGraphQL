@@ -17,15 +17,18 @@ namespace EntityGraphQL.Schema
         internal static string Make(ISchemaProvider schema)
         {
             var rootQueryType = schema.GetSchemaType(schema.QueryContextType, null);
-            var mutationType = schema.GetSchemaType(schema.MutationType, null);
+            var mutationType = schema.Mutation().SchemaType;
+            var subscriptionType = schema.Subscription().SchemaType;
 
             var types = BuildSchemaTypes(schema);
 
             var schemaBuilder = new StringBuilder("schema {");
             schemaBuilder.AppendLine();
             schemaBuilder.AppendLine($"\tquery: {rootQueryType.Name}");
-            if (mutationType.GetFields().Any())
+            if (mutationType.GetFields().Any(f => !f.Name.StartsWith("__")))
                 schemaBuilder.AppendLine($"\tmutation: {mutationType.Name}");
+            if (subscriptionType.GetFields().Any(f => !f.Name.StartsWith("__")))
+                schemaBuilder.AppendLine($"\tsubscription: {subscriptionType.Name}");
             schemaBuilder.AppendLine("}");
 
             schemaBuilder.AppendLine();
@@ -92,7 +95,7 @@ namespace EntityGraphQL.Schema
                 if (typeItem.Name.StartsWith("__") || typeItem.IsEnum || typeItem.IsScalar || typeItem.Name == schema.Mutation().SchemaType.Name)
                     continue;
 
-                if (!typeItem.GetFields().Any())
+                if (!typeItem.GetFields().Any(f => !f.Name.StartsWith("__")))
                     continue;
 
                 types.AppendLine(OutputSchemaType(schema, typeItem));

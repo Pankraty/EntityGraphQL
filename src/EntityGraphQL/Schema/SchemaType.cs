@@ -8,7 +8,7 @@ using EntityGraphQL.Compiler.Util;
 
 namespace EntityGraphQL.Schema
 {
-    public class SchemaType<TBaseType> : BaseSchemaTypeWithFields<Field>
+    public class SchemaType<TBaseType> : BaseSchemaTypeWithFields<IField>
     {
         public override Type TypeDotnet { get; }
         public override bool IsOneOf { get; }
