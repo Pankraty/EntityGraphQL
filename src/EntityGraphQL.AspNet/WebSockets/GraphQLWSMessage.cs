@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace EntityGraphQL.AspNet.WebScokets
+namespace EntityGraphQL.AspNet.WebSockets
 {
     public class TypeOnlyGraphQLWSResponse
     {

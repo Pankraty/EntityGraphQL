@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using EntityGraphQL.Compiler;
 
-namespace EntityGraphQL.AspNet.WebScokets
+namespace EntityGraphQL.AspNet.WebSockets
 {
     /// <summary>
     /// Ties the GraphQL subscription to the WebSocket connection.
@@ -61,7 +61,7 @@ namespace EntityGraphQL.AspNet.WebScokets
         }
     }
 
-    internal interface IWebSocketSubscription : IDisposable
+    public interface IWebSocketSubscription : IDisposable
     {
     }
 }

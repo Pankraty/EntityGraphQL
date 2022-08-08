@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using EntityGraphQL.Schema;
-using EntityGraphQL.AspNet.WebScokets;
+using EntityGraphQL.AspNet.WebSockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;

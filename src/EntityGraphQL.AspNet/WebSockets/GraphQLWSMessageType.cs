@@ -1,4 +1,4 @@
-namespace EntityGraphQL.AspNet.WebScokets
+namespace EntityGraphQL.AspNet.WebSockets
 {
     /// <summary>
     /// Protocol message type.
