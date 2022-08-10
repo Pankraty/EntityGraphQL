@@ -134,7 +134,7 @@ namespace EntityGraphQL.AspNet.WebSockets
                     // Wonder if there is a better way to figure this out? Spec says subscription can only have a single root field
                     // so if there are no errors we must have a successful subscription method result
                     var subscriptionData = result.Data!.Values.First() as SubscriptionResult;
-                    var wsSubscription = (IWebSocketSubscription)Activator.CreateInstance(typeof(WebSocketSubscription<>).MakeGenericType(subscriptionData!.EventType), graphQLWSMessage.Id!.Value, subscriptionData!.SubscriptionObservable, (IGraphQLWebSocketServer)this, subscriptionData!.SubscriptionStatement, subscriptionData!.Field)!;
+                    var wsSubscription = (IWebSocketSubscription)Activator.CreateInstance(typeof(WebSocketSubscription<>).MakeGenericType(subscriptionData!.EventType), graphQLWSMessage.Id!.Value, subscriptionData!.Subscription, this, subscriptionData!.SubscriptionStatement, subscriptionData!.Field)!;
                     subscriptions.Add(graphQLWSMessage.Id!.Value, wsSubscription!);
                 }
             }

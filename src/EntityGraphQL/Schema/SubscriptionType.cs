@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -85,7 +86,7 @@ public class SubscriptionType
         var requiredClaims = methodAuth;
         if (classLevelRequiredAuth != null)
             requiredClaims = requiredClaims.Concat(classLevelRequiredAuth);
-        var actualReturnType = isAsync || method.ReturnType.GetGenericTypeDefinition() == typeof(IObservable<>) ? method.ReturnType.GetGenericArguments()[0] : method.ReturnType;
+        var actualReturnType = isAsync || method.ReturnType.GetGenericTypeDefinition() == typeof(IObservable<>) || method.ReturnType.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>) ? method.ReturnType.GetGenericArguments()[0] : method.ReturnType;
         var typeName = SchemaType.Schema.GetSchemaType(actualReturnType.GetNonNullableOrEnumerableType(), null).Name;
         var returnType = new GqlTypeInfo(() => SchemaType.Schema.Type(typeName), actualReturnType, method);
         var subscriptionField = new SubscriptionField(SchemaType.Schema, name, returnType, method, description ?? string.Empty, requiredClaims, isAsync, SchemaType.Schema.SchemaFieldNamer, autoAddInputTypes);

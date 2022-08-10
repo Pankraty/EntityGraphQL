@@ -8,16 +8,16 @@ namespace EntityGraphQL.Subscriptions
     {
         public Type EventType { get; }
         /// <summary>
-        /// Will be the IObservable<TQueryType>
+        /// Will be the IObservable<TQueryType> or IAsyncEnumerable<TQueryType>
         /// </summary>
-        public object SubscriptionObservable { get; }
+        public object Subscription { get; }
         public GraphQLSubscriptionStatement SubscriptionStatement { get; }
         public GraphQLSubscriptionField Field { get; }
 
         public SubscriptionResult(Type eventType, object result, GraphQLSubscriptionStatement graphQLSubscriptionStatement, GraphQLSubscriptionField node)
         {
             EventType = eventType;
-            SubscriptionObservable = result;
+            Subscription = result;
             SubscriptionStatement = graphQLSubscriptionStatement;
             Field = node;
         }

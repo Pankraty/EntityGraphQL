@@ -7,6 +7,7 @@ public class ChatService
     private readonly List<Message> messages = new();
     private readonly Broadcaster<Message> broadcaster = new();
 
+
     public Message PostMessage(string message, string user)
     {
         var msg = new Message
@@ -28,6 +29,36 @@ public class ChatService
     public IObservable<Message> Subscribe()
     {
         return broadcaster;
+    }
+}
+
+public class ChatServiceEnumerable
+{
+    private readonly List<Message> messages = new();
+
+    public SubscriptionBroadcaster<Message> broadcaster = new();
+
+    public Message PostMessage(string message, string user)
+    {
+        var msg = new Message
+        {
+            Id = Guid.NewGuid(),
+            Text = message,
+            Timestamp = DateTime.Now,
+            User = user,
+        };
+
+        lock (messages)
+            messages.Add(msg);
+
+        broadcaster.OnNext(msg);
+
+        return msg;
+    }
+
+    public IAsyncEnumerable<Message> Subscribe()
+    {
+        return broadcaster.NewSubscription();
     }
 }
 

@@ -20,7 +20,7 @@ namespace EntityGraphQL.Schema
         public SubscriptionField(ISchemaProvider schema, string methodName, GqlTypeInfo returnType, MethodInfo method, string description, RequiredAuthorization requiredAuth, bool isAsync, Func<string, string> fieldNamer, bool autoAddInputTypes)
             : base(schema, methodName, description, returnType)
         {
-            if (method.ReturnType.GetGenericTypeDefinition() != typeof(IObservable<>))
+            if (method.ReturnType.GetGenericTypeDefinition() != typeof(IObservable<>) && method.ReturnType.GetGenericTypeDefinition() != typeof(IAsyncEnumerable<>))
                 throw new EntityGraphQLCompilerException($"Subscription {methodName} should return an IObservable<>");
 
             Services = new List<Type>();

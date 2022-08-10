@@ -33,7 +33,7 @@ const ChatBox = (props) => {
     const [user, setUser] = React.useState(props.user)
     const [message, setMessage] = React.useState('')
     const [postMessage] = useMutation(gql`mutation PostMessage($user: String!, $message: String!) {
-        postMessage(user: $user, message: $message) { id }
+        postMessageEnumerable(user: $user, message: $message) { id }
     }`)
 
     return <div className="d-flex flex-column flex-fill p-2">
@@ -54,7 +54,7 @@ const ChatBox = (props) => {
 
 const ChatRoom = () => {
     const { data, loading } = useSubscription(gql`subscription ChatRoom {
-        onMessage { id user text timestamp }
+        onMessageEnumerable { id user text timestamp }
     }`, {
         shouldResubscribe: true,
     });
@@ -62,7 +62,7 @@ const ChatRoom = () => {
 
     useEffect(() => {
         if (data && !loading)
-            setChat(chat => [...chat, data.onMessage])
+            setChat(chat => [...chat, data.onMessageEnumerable])
     }, [data, loading])
 
     return <div className="d-flex flex-column flex-fill p-2">

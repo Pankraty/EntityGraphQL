@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using EntityGraphQL.Compiler;
 
 namespace EntityGraphQL.AspNet.WebSockets
@@ -13,31 +15,62 @@ namespace EntityGraphQL.AspNet.WebSockets
     internal class WebSocketSubscription<TEventType> : IWebSocketSubscription, IObserver<TEventType>
     {
         private readonly Guid id;
-        private readonly IObservable<TEventType> observable;
         private readonly IGraphQLWebSocketServer server;
-        private readonly IDisposable subscription;
         private readonly GraphQLSubscriptionStatement subscriptionStatement;
         private readonly GraphQLSubscriptionField subscriptionNode;
 
-        public WebSocketSubscription(Guid id, object observable, IGraphQLWebSocketServer server, GraphQLSubscriptionStatement subscriptionStatement, GraphQLSubscriptionField node)
+        private readonly IObservable<TEventType>? observable;
+        private readonly IDisposable? subscription;
+        private readonly WebSocketSubscriptionMode mode = WebSocketSubscriptionMode.None;
+        private readonly object? subscriptionTask;
+
+        public WebSocketSubscription(Guid id, object subscriptionResult, IGraphQLWebSocketServer server, GraphQLSubscriptionStatement subscriptionStatement, GraphQLSubscriptionField node)
         {
             this.id = id;
-            this.observable = (IObservable<TEventType>)observable;
             this.server = server;
             this.subscriptionStatement = subscriptionStatement;
             this.subscriptionNode = node;
-
-            this.subscription = this.observable.Subscribe(this);
+            if (subscriptionResult.GetType().GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IObservable<>)))
+            {
+                mode = WebSocketSubscriptionMode.Observable;
+                this.observable = (IObservable<TEventType>)subscriptionResult;
+                this.subscription = this.observable.Subscribe(this);
+            }
+            else
+            {
+                mode = WebSocketSubscriptionMode.AsyncEnumerable;
+                this.subscriptionTask = Task.Run(() => WatchForEvents((IAsyncEnumerable<TEventType>)subscriptionResult));
+            }
         }
 
-        public void OnNext(TEventType value)
+        private async void WatchForEvents(IAsyncEnumerable<TEventType> subscriptionResult)
         {
             try
             {
-                var data = subscriptionStatement.ExecuteSubscriptionEvent(subscriptionNode, value);
-                var result = new QueryResult();
-                result.SetData(new Dictionary<string, object?> { { subscriptionNode.Name, data } });
-                server.SendNextAsync(id, result).GetAwaiter().GetResult();
+                await foreach (var item in subscriptionResult)
+                {
+                    await SendNewData(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
+            }
+        }
+
+        private async Task SendNewData(TEventType item)
+        {
+            var data = subscriptionStatement.ExecuteSubscriptionEvent(subscriptionNode, item);
+            var result = new QueryResult();
+            result.SetData(new Dictionary<string, object?> { { subscriptionNode.Name, data } });
+            await server.SendNextAsync(id, result);
+        }
+
+        public void OnNext(TEventType item)
+        {
+            try
+            {
+                SendNewData(item).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
@@ -57,8 +90,22 @@ namespace EntityGraphQL.AspNet.WebSockets
 
         public void Dispose()
         {
-            subscription.Dispose();
+            if (mode == WebSocketSubscriptionMode.Observable)
+            {
+                subscription!.Dispose();
+            }
+            else
+            {
+
+            }
         }
+    }
+
+    internal enum WebSocketSubscriptionMode
+    {
+        None,
+        Observable,
+        AsyncEnumerable
     }
 
     public interface IWebSocketSubscription : IDisposable

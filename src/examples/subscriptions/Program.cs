@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
 
 builder.Services.AddDbContext<ChatContext>(opt => opt.UseSqlite("Filename=chat.db"));
 builder.Services.AddSingleton<ChatService>();
+builder.Services.AddSingleton<ChatServiceEnumerable>();
 
 builder.Services.AddGraphQLSchema<ChatContext>(options =>
 {
