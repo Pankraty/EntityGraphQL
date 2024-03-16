@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using EntityGraphQL.Compiler;
+using EntityGraphQL.Compiler.EntityQuery;
 using EntityGraphQL.Compiler.Util;
 using EntityGraphQL.Directives;
 using EntityGraphQL.Schema.Directives;
@@ -25,6 +26,7 @@ namespace EntityGraphQL.Schema
         public Type QueryContextType { get { return queryType.TypeDotnet; } }
         public Type MutationType { get { return mutationType.SchemaType.TypeDotnet; } }
         public Type SubscriptionType { get { return subscriptionType.SchemaType.TypeDotnet; } }
+        public IMethodProvider? MethodProvider { get; }
         public Func<string, string> SchemaFieldNamer { get; }
         public IGqlAuthorizationService AuthorizationService { get; set; }
         private readonly Dictionary<string, ISchemaType> schemaTypes = new();
@@ -55,11 +57,13 @@ namespace EntityGraphQL.Schema
         /// Create a new GraphQL Schema provider that defines all the types and fields etc.
         /// </summary>
         /// <param name="fieldNamer">A naming function for fields that will be used when using methods that automatically create field names e.g. SchemaType.AddAllFields()</param>
-        public SchemaProvider(IGqlAuthorizationService? authorizationService = null, Func<string, string>? fieldNamer = null, ILogger<SchemaProvider<TContextType>>? logger = null, bool introspectionEnabled = true, bool isDevelopment = true)
+        public SchemaProvider(IGqlAuthorizationService? authorizationService = null, Func<string, string>? fieldNamer = null, ILogger<SchemaProvider<TContextType>>? logger = null, bool introspectionEnabled = true, bool isDevelopment = true,
+            IMethodProvider? methodProvider = null)
         {
             AuthorizationService = authorizationService ?? new RoleBasedAuthorization();
             SchemaFieldNamer = fieldNamer ?? SchemaBuilderSchemaOptions.DefaultFieldNamer;
             this.logger = logger;
+            MethodProvider = methodProvider;
             this.graphQLCompiler = new GraphQLCompiler(this);
             this.introspectionEnabled = introspectionEnabled;
             this.isDevelopment = isDevelopment;

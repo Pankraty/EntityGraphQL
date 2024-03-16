@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EntityGraphQL.Compiler.EntityQuery;
 using EntityGraphQL.Directives;
 
 namespace EntityGraphQL.Schema
@@ -17,6 +18,7 @@ namespace EntityGraphQL.Schema
         Type QueryContextType { get; }
         Type MutationType { get; }
         Type SubscriptionType { get; }
+        IMethodProvider? MethodProvider { get; }
         Func<string, string> SchemaFieldNamer { get; }
         IGqlAuthorizationService AuthorizationService { get; set; }
         string QueryContextName { get; }

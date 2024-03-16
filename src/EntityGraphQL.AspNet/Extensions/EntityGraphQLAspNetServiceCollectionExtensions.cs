@@ -46,9 +46,11 @@ namespace EntityGraphQL.AspNet
             var options = new AddGraphQLOptions<TSchemaContext>();
             configure(options);
 
+            var methodProvider = options.MethodProviderFactory?.Invoke();
             var schema = new SchemaProvider<TSchemaContext>(
                 new PolicyOrRoleBasedAuthorization(authService), options.FieldNamer,
-                isDevelopment: webHostEnvironment?.IsEnvironment("Development") ?? true
+                isDevelopment: webHostEnvironment?.IsEnvironment("Development") ?? true,
+                methodProvider: methodProvider
                 );
             options.PreBuildSchemaFromContext?.Invoke(schema);
             if (options.AutoBuildSchemaFromContext)

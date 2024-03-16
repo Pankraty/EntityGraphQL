@@ -1,4 +1,5 @@
 using System;
+using EntityGraphQL.Compiler.EntityQuery;
 using EntityGraphQL.Schema;
 
 namespace EntityGraphQL.AspNet
@@ -25,5 +26,10 @@ namespace EntityGraphQL.AspNet
         /// Or use this to configure the whole schema if AutoBuildSchemaFromContext is false.
         /// </summary>
         public Action<SchemaProvider<TSchemaContext>>? ConfigureSchema { get; set; }
+
+        /// <summary>
+        /// Defines factory method for creating method provider.
+        /// </summary>
+        public Func<IMethodProvider> MethodProviderFactory { get; set; } = () => new DefaultMethodProvider();
     }
 }
