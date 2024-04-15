@@ -64,4 +64,16 @@ namespace EntityGraphQL.Tests
         public DateTime? Birthday { get; set; }
         public IEnumerable<Dog> Dogs { get; set; }
     }
+
+    public class TestUnionDataContext2
+    {
+        public List<PetOwner> PetOwners { get; set; } = new List<PetOwner>();
+    }
+
+    public class PetOwner
+    {
+        public int Id { get; set; }
+
+        public IAnimal FavoritePet { get; set; }
+    }
 }

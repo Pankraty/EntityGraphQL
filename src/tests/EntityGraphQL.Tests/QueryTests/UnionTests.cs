@@ -213,5 +213,49 @@ query {
             Assert.Throws<RuntimeBinderException>(() => animals[1].name);
             Assert.Throws<RuntimeBinderException>(() => animals[1].lives);
         }
+
+        [Fact]
+        public void TestAutoUnion_InterfaceTypedField()
+        {
+            var schema = SchemaBuilder.FromObject<TestUnionDataContext2>(new SchemaBuilderOptions { AutoCreateInterfaceTypes = true });
+            Assert.True(schema.HasType(typeof(IAnimal)));
+            Assert.True(schema.GetSchemaType(typeof(IAnimal), null).GqlType == GqlTypes.Union);
+
+            schema.Type<IAnimal>().AddPossibleType<Dog>();
+            schema.Type<IAnimal>().AddPossibleType<Cat>();
+            Assert.True(schema.GetSchemaType(typeof(Cat), null).GqlType == GqlTypes.QueryObject);
+            Assert.True(schema.GetSchemaType(typeof(Dog), null).GqlType == GqlTypes.QueryObject);
+
+            var gql = new GraphQLCompiler(schema).Compile("""
+                query {
+                    petOwners {
+                        favoritePet
+                        {
+                            __typename
+                            ... on Cat {
+                               lives
+                            }
+                            ... on Dog {
+                               hasBone
+                            }
+                        }
+                    }
+                }
+                """);
+            var context = new TestUnionDataContext2();
+            context.PetOwners.Add(new() { Id = 1, FavoritePet = new Dog() { Name = "steve", HasBone = true } });
+            context.PetOwners.Add(new() { Id = 2, FavoritePet = new Cat() { Name = "george", Lives = 9 } });
+
+            var qr = gql.ExecuteQuery(context, null, null);
+            dynamic petOwners = qr.Data["petOwners"];
+
+            Assert.Equal(2, petOwners.Count);
+            Assert.Equal("Dog", petOwners[0].favoritePet.__typename);
+            //Assert.Equal("steve", petOwners[0].favoritePet.name);
+            Assert.True(petOwners[0].favoritePet.hasBone);
+            Assert.Equal("Cat", petOwners[1].favoritePet.__typename);
+            //Assert.Equal("george", petOwners[1].favoritePet.name);
+            Assert.Equal(9, petOwners[1].favoritePet.lives);
+        }
     }
 }
